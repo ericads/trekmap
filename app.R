@@ -8,41 +8,73 @@
 #
 
 library(shiny)
+library(plotly)
+library(readr)
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
+ui <- fluidPage(tags$style("body {background-color: black; }"),
 
     # Application title
-    titlePanel("Old Faithful Geyser Data"),
+    titlePanel("Star map"),
 
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-        sidebarPanel(
-            sliderInput("bins",
-                        "Number of bins:",
-                        min = 1,
-                        max = 50,
-                        value = 30)
-        ),
 
         # Show a plot of the generated distribution
-        mainPanel(
-           plotOutput("distPlot")
-        )
+        #mainPanel(
+           plotlyOutput("test_plot")
+        #)
     )
-)
+
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+    
+    trekData_test <- read_csv("trekData_test.csv", 
+                              col_names = FALSE, 
+                              col_types = cols(X1 = col_character()))
+    
+    output$test_plot <- renderPlotly({
+        fig <- plot_ly(trekData_test,x = ~X3, y = ~X4, z = ~X5, type = "scatter3d", mode = "markers",
+                marker = list(symbol = 'circle', sizemode = 'diameter', size = 2), 
+                text = ~paste('Body:', X1,'<br>Location',X2),
+                height = 800)
+        axx <- list(
+            backgroundcolor="rgb(200, 200, 230",
+            gridcolor="rgb(255,255,255)",
+            showbackground=TRUE,
+            zerolinecolor="rgb(255,255,255",
+            zeroline = FALSE,
+            showline = FALSE,
+            showticklabels = FALSE
+        )
+        
+        axy <- list(
+            backgroundcolor="rgb(230, 200,230)",
+            gridcolor="rgb(255,255,255)",
+            showbackground=TRUE,
+            zerolinecolor="rgb(255,255,255",
+            zeroline = FALSE,
+            showline = FALSE,
+            showticklabels = FALSE
+        )
+        
+        axz <- list(
+            backgroundcolor="rgb(230, 230,200)",
+            gridcolor="rgb(255,255,255)",
+            showbackground=TRUE,
+            zerolinecolor="rgb(255,255,255",
+            zeroline = FALSE,
+            showline = FALSE,
+            showticklabels = FALSE
 
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white')
+        )
+        
+        fig %>% layout(scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
+        fig %>% layout(fig_bgcolor='rgb(0, 0, 0)',paper_bgcolor='rgb(0, 0, 0)',plot_bgcolor='rgb(0, 0, 0)')
+        
+        
     })
+
+    
 }
 
 # Run the application 
